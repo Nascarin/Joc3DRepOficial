@@ -38,6 +38,7 @@ public class PlayerMovement : MonoBehaviour
     private float floorY;
     public Vector3 playerPos;
     public Vector3 initialPos;
+    public EndRunSequence endRunSequence;
     // Start is called before the first frame update
     void Start()
     {
@@ -59,6 +60,7 @@ public class PlayerMovement : MonoBehaviour
             RunSpeed = 0;
             cameraSpeed = 0;
             terminal = true;
+            endRunSequence.StartEndSequence();
         }
         if (collision.gameObject.tag == "LeftWall") {
             leftCrash = true;
@@ -191,6 +193,7 @@ public class PlayerMovement : MonoBehaviour
         {
             falling = true;
             animator.SetBool("isFalling", true);
+            endRunSequence.StartEndSequence();
         }
         else falling = false;
     }
