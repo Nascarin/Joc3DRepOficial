@@ -23,7 +23,7 @@ public class EndRunSequence : MonoBehaviour
         endScreen.SetActive(true);
         yield return new WaitForSeconds(3);
         fadeOut.SetActive(true);
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(3.5f);
         SceneManager.LoadScene(0);
 
     }
