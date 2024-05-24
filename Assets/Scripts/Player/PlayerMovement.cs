@@ -11,6 +11,8 @@ public class PlayerMovement : MonoBehaviour
     public BoxCollider trigHitbox;
     private float speedNerfTimer = 0;
     public float RunSpeed;
+    private float idleRunSpeed;
+    private float CrashSpeed;
     public float cameraSpeed;
     float initialRunSpeed;
     public float HorizontalSpeed = 0;
@@ -23,6 +25,7 @@ public class PlayerMovement : MonoBehaviour
     bool canCrawl = true;
     public bool leftCrash = false;
     public bool rightCrash = false;
+    public bool enemyFollow = false;
     bool startCrawlTimer = false;
     bool hasTurned = false;
     public bool leftTurnPerformed = false;
@@ -32,12 +35,15 @@ public class PlayerMovement : MonoBehaviour
     float crawlTimer = 0;
     float turnCooldown = 0;
     float lateralCrashCooldown = 0;
+    float nonFinishingCooldown = 0;
     float newLateralCrashCooldown = 0;
     public float jumpDiff = 0;
     private Rigidbody rb;
     private float floorY;
+    public bool crashedNonTerminal;
     public Vector3 playerPos;
     public Vector3 initialPos;
+    public EndRunSequence endRunSequence;
     // Start is called before the first frame update
     void Start()
     {
@@ -49,6 +55,9 @@ public class PlayerMovement : MonoBehaviour
         initialRunSpeed = RunSpeed;
         cameraSpeed = RunSpeed;
         initialPos = transform.position;
+        CrashSpeed = RunSpeed * 0.5f;
+        idleRunSpeed = RunSpeed;
+        crashedNonTerminal = false;
     }
 
     // Collision detection
@@ -59,17 +68,62 @@ public class PlayerMovement : MonoBehaviour
             RunSpeed = 0;
             cameraSpeed = 0;
             terminal = true;
+            endRunSequence.StartEndSequence();
         }
         if (collision.gameObject.tag == "LeftWall") {
-            leftCrash = true;
-            Debug.Log("WALL-TOUCHED!!");
-            if (lateralCrashCooldown == 0) RunSpeed = RunSpeed * 0.5f;
+            if (lateralCrashCooldown == 0 || lateralCrashCooldown > 1) {
+                if (leftCrash || rightCrash)
+                {
+                    RunSpeed = 0;
+                    cameraSpeed = 0;
+                    terminal = true;
+                }
+                else
+                {
+                    leftCrash = true;
+                    enemyFollow = true;
+                    Debug.Log("LEFT-WALL-TOUCHED!!");
+                    if (lateralCrashCooldown == 0) RunSpeed = CrashSpeed;
+                }
+            }
         }
         if (collision.gameObject.tag == "RightWall")
         {
-            rightCrash = true;
-            Debug.Log("RIGHT-WALL-TOUCHED!!");
-            if (lateralCrashCooldown == 0) RunSpeed = RunSpeed * 0.5f;
+            if (lateralCrashCooldown == 0 || lateralCrashCooldown > 1) {
+                if (rightCrash || leftCrash)
+                {
+                    RunSpeed = 0;
+                    cameraSpeed = 0;
+                    terminal = true;
+                }
+                else
+                {
+                    rightCrash = true;
+                    enemyFollow = true;
+                    Debug.Log("RIGHT-WALL-TOUCHED!!");
+                    if (lateralCrashCooldown == 0) RunSpeed = CrashSpeed;
+                }
+            }
+        }
+        if (collision.gameObject.tag == "NonFOBS") {
+            if (crashedNonTerminal)
+            {
+                RunSpeed = 0;
+                cameraSpeed = 0;
+                terminal = true;
+                animator.SetBool("Injured", false);
+            }
+            else {
+                Quaternion rot = transform.rotation; // Safety measures: Avoiding unexpected behaviour from the physics engine
+                transform.Translate(new Vector3(0, 0, 1.4f), Space.Self);
+                transform.rotation = rot;
+                crashedNonTerminal = true;
+                if (nonFinishingCooldown == 0) RunSpeed = CrashSpeed;
+                animator.SetBool("Injured", true);
+            }
+        }
+        if (collision.gameObject.tag == "Coin") {
+            Debug.Log("COIN TOUCHED");
         }
     }
 
@@ -104,7 +158,7 @@ public class PlayerMovement : MonoBehaviour
         }
         if (!canJump) {
             if (jumpCooldown > 1 && (transform.localPosition.y - floorY) < jumpDiff) animator.SetBool("isJumping", false);
-            if (/*(transform.localPosition.y - floorY) < jumpDiff && */jumpCooldown > 2.5f)
+            if (/*(transform.localPosition.y - floorY) < jumpDiff && */jumpCooldown > 1.5f)
             {
                 canJump = true;
                 //hitbox.center = new Vector3(0, 0.82f, 0);
@@ -138,27 +192,41 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Check left side wall crash
-        if (leftCrash) {
+        if (leftCrash && !terminal) {
             if (lateralCrashCooldown > 5)
             {
                 leftCrash = false;
-                RunSpeed = RunSpeed * 2;
+                RunSpeed = idleRunSpeed;
                 lateralCrashCooldown = 0;
+                enemyFollow = false;
             }
             else lateralCrashCooldown += Time.deltaTime;
         }
 
 
         // Check left side wall crash
-        if (rightCrash)
+        if (rightCrash && !terminal)
         {
             if (lateralCrashCooldown > 5)
             {
                 rightCrash = false;
-                RunSpeed = RunSpeed * 2;
+                RunSpeed = idleRunSpeed;
                 lateralCrashCooldown = 0;
+                enemyFollow = false;
             }
             else lateralCrashCooldown += Time.deltaTime;
+        }
+
+        // Check crash with non-terminal obstacles
+        if (crashedNonTerminal && !terminal) {
+            if (nonFinishingCooldown > 5)
+            {
+                crashedNonTerminal = false;
+                RunSpeed = idleRunSpeed;
+                nonFinishingCooldown = 0;
+                animator.SetBool("Injured", false);
+            }
+            else nonFinishingCooldown += Time.deltaTime;
         }
 
         // Turn Right
@@ -191,6 +259,8 @@ public class PlayerMovement : MonoBehaviour
         {
             falling = true;
             animator.SetBool("isFalling", true);
+            terminal = true;
+            endRunSequence.StartEndSequence();
         }
         else falling = false;
     }
