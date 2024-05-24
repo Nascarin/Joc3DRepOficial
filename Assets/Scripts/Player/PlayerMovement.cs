@@ -43,6 +43,7 @@ public class PlayerMovement : MonoBehaviour
     public bool crashedNonTerminal;
     public Vector3 playerPos;
     public Vector3 initialPos;
+    public EndRunSequence endRunSequence;
     // Start is called before the first frame update
     void Start()
     {
@@ -67,6 +68,7 @@ public class PlayerMovement : MonoBehaviour
             RunSpeed = 0;
             cameraSpeed = 0;
             terminal = true;
+            endRunSequence.StartEndSequence();
         }
         if (collision.gameObject.tag == "LeftWall") {
             if (lateralCrashCooldown == 0 || lateralCrashCooldown > 1) {
@@ -258,6 +260,7 @@ public class PlayerMovement : MonoBehaviour
             falling = true;
             animator.SetBool("isFalling", true);
             terminal = true;
+            endRunSequence.StartEndSequence();
         }
         else falling = false;
     }
