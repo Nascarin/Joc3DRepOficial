@@ -3078,8 +3078,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0.04736328, y: 53.358}
-  m_SizeDelta: {x: -1650.7, y: 14.717}
+  m_AnchoredPosition: {x: -0.032043457, y: 48.777}
+  m_SizeDelta: {x: -1526.2, y: 18.636}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1646557160
 MonoBehaviour:
@@ -3108,13 +3108,13 @@ MonoBehaviour:
     m_BestFit: 0
     m_MinSize: 1
     m_MaxSize: 46
-    m_Alignment: 3
+    m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: ' hint text placeholder'
+  m_Text: "\"Race for your life \u2013 evade the enemy and survive the battlefield!\""
 --- !u!222 &1646557161
 CanvasRenderer:
   m_ObjectHideFlags: 0
