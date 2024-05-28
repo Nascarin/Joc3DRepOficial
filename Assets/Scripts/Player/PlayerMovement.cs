@@ -44,12 +44,25 @@ public class PlayerMovement : MonoBehaviour
     public Vector3 playerPos;
     public Vector3 initialPos;
     public EndRunSequence endRunSequence;
+
+    private AudioSource playerSound;
+
+    public AudioClip startRun1;
+    public AudioClip startRun2;
+    public AudioClip startRun3;
+    public AudioClip jumpSound;
+    public AudioClip dieSound;
+    public AudioClip hitWall;
+    public AudioClip runSound;
+    public AudioClip coinSound;  
+    public AudioClip hitObstacle;
+    public AudioClip slideSound; 
+
     // Start is called before the first frame update
     void Start()
     {
         animator = GetComponent<Animator>();
         hitbox = GetComponent<BoxCollider>();
-        //trigHitbox = GetComponent<BoxCollider>();
         rb = GetComponent<Rigidbody>();
         floorY = transform.localPosition.y;
         initialRunSpeed = RunSpeed;
@@ -58,25 +71,47 @@ public class PlayerMovement : MonoBehaviour
         CrashSpeed = RunSpeed * 0.5f;
         idleRunSpeed = RunSpeed;
         crashedNonTerminal = false;
+        playerSound = GetComponent<AudioSource>();
+        StartCoroutine(PlayStartingSounds());
+    }
+
+    private IEnumerator PlayStartingSounds()
+    {
+        playerSound.PlayOneShot(startRun1, 1.0f);
+        yield return new WaitForSeconds(startRun1.length);
+        playerSound.PlayOneShot(startRun2, 1.0f);
+        yield return new WaitForSeconds(startRun2.length);
+        playerSound.PlayOneShot(startRun3, 1.0f);
+        yield return new WaitForSeconds(startRun3.length);
+
+        playerSound.clip = runSound;
+        playerSound.loop = true;
+        playerSound.Play();
     }
 
     // Collision detection
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.tag == "FRObstacle") {
+        if (collision.gameObject.tag == "FRObstacle")
+        {
             animator.SetBool("FrontalCrash", true);
             RunSpeed = 0;
             cameraSpeed = 0;
+            StopRunningSoundAndPlayDeath();
             terminal = true;
             endRunSequence.StartEndSequence();
         }
-        if (collision.gameObject.tag == "LeftWall") {
-            if (lateralCrashCooldown == 0 || lateralCrashCooldown > 1) {
+        if (collision.gameObject.tag == "LeftWall")
+        {
+            playerSound.PlayOneShot(hitWall, 1.0f);
+            if (lateralCrashCooldown == 0 || lateralCrashCooldown > 1)
+            {
                 if (leftCrash || rightCrash)
                 {
                     RunSpeed = 0;
                     cameraSpeed = 0;
                     terminal = true;
+                    StopRunningSoundAndPlayDeath();
                 }
                 else
                 {
@@ -89,12 +124,15 @@ public class PlayerMovement : MonoBehaviour
         }
         if (collision.gameObject.tag == "RightWall")
         {
-            if (lateralCrashCooldown == 0 || lateralCrashCooldown > 1) {
+            playerSound.PlayOneShot(hitWall, 1.0f);
+            if (lateralCrashCooldown == 0 || lateralCrashCooldown > 1)
+            {
                 if (rightCrash || leftCrash)
                 {
                     RunSpeed = 0;
                     cameraSpeed = 0;
                     terminal = true;
+                    StopRunningSoundAndPlayDeath();
                 }
                 else
                 {
@@ -105,15 +143,19 @@ public class PlayerMovement : MonoBehaviour
                 }
             }
         }
-        if (collision.gameObject.tag == "NonFOBS") {
+        if (collision.gameObject.tag == "NonFOBS")
+        {
             if (crashedNonTerminal)
             {
                 RunSpeed = 0;
                 cameraSpeed = 0;
                 terminal = true;
+                StopRunningSoundAndPlayDeath();
                 animator.SetBool("Injured", false);
             }
-            else {
+            else
+            {
+                playerSound.PlayOneShot(hitObstacle, 1.0f); // Reproducir sonido de deslizamiento
                 Quaternion rot = transform.rotation; // Safety measures: Avoiding unexpected behaviour from the physics engine
                 transform.Translate(new Vector3(0, 0, 1.4f), Space.Self);
                 transform.rotation = rot;
@@ -122,7 +164,9 @@ public class PlayerMovement : MonoBehaviour
                 animator.SetBool("Injured", true);
             }
         }
-        if (collision.gameObject.tag == "Coin") {
+        if (collision.gameObject.tag == "Coin")
+        {
+            playerSound.PlayOneShot(coinSound, 1.0f); // Reproducir sonido de moneda
             Debug.Log("COIN TOUCHED");
         }
     }
@@ -135,44 +179,50 @@ public class PlayerMovement : MonoBehaviour
         trigHitbox.size = hitbox.size;
         playerPos = transform.position;
         // Idle forward running
-        transform.Translate(new Vector3(0.0f,0.0f,1.0f) * Time.deltaTime * RunSpeed, Space.Self);
+        transform.Translate(new Vector3(0.0f, 0.0f, 1.0f) * Time.deltaTime * RunSpeed, Space.Self);
 
         // Moving to the left
-        if (Input.GetKey(KeyCode.LeftArrow)) {
-                transform.Translate(new Vector3(-1.0f, 0.0f, 0.0f) * Time.deltaTime * HorizontalSpeed, Space.Self);
+        if (Input.GetKey(KeyCode.LeftArrow))
+        {
+            transform.Translate(new Vector3(-1.0f, 0.0f, 0.0f) * Time.deltaTime * HorizontalSpeed, Space.Self);
         }
 
         // Moving to the right
         if (Input.GetKey(KeyCode.RightArrow))
         {
-                transform.Translate(new Vector3(1.0f, 0.0f, 0.0f) * Time.deltaTime * HorizontalSpeed, Space.Self);
+            transform.Translate(new Vector3(1.0f, 0.0f, 0.0f) * Time.deltaTime * HorizontalSpeed, Space.Self);
         }
 
         // Jumping
-        if (canJump && Input.GetKey(KeyCode.UpArrow)) {
+        if (canJump && Input.GetKey(KeyCode.UpArrow))
+        {
             Debug.Log("JUMPING-SETTING-ANIM");
             animator.SetBool("isJumping", true);
+            playerSound.PlayOneShot(jumpSound, 1.0f);
             canJump = false;
             rb.AddForce(Vector3.up * jumpIntensity, ForceMode.Impulse);
             hitbox.center = new Vector3(0, 1.88f, 0);
         }
-        if (!canJump) {
+        if (!canJump)
+        {
             if (jumpCooldown > 1 && (transform.localPosition.y - floorY) < jumpDiff) animator.SetBool("isJumping", false);
-            if (/*(transform.localPosition.y - floorY) < jumpDiff && */jumpCooldown > 1.5f)
+            if (jumpCooldown > 1.5f)
             {
                 canJump = true;
-                //hitbox.center = new Vector3(0, 0.82f, 0);
                 jumpCooldown = 0;
             }
             else jumpCooldown += Time.deltaTime;
-            if (jumpCooldown > 1) {
+            if (jumpCooldown > 1)
+            {
                 hitbox.center = new Vector3(0, 0.82f, 0);
             }
         }
 
         // Crawling
-        if (canCrawl && Input.GetKey(KeyCode.DownArrow)) {
+        if (canCrawl && Input.GetKey(KeyCode.DownArrow))
+        {
             animator.SetBool("isCrawling", true);
+            playerSound.PlayOneShot(slideSound, 1.0f);
             canCrawl = false;
             startCrawlTimer = true;
             hitbox.center = new Vector3(0, 0.68f, 0);
@@ -182,7 +232,8 @@ public class PlayerMovement : MonoBehaviour
         {
             crawlTimer += Time.deltaTime;
         }
-        else if (crawlTimer > 1.2){
+        else if (crawlTimer > 1.2)
+        {
             startCrawlTimer = false;
             crawlTimer = 0;
             canCrawl = true;
@@ -192,7 +243,8 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Check left side wall crash
-        if (leftCrash && !terminal) {
+        if (leftCrash && !terminal)
+        {
             if (lateralCrashCooldown > 5)
             {
                 leftCrash = false;
@@ -203,8 +255,7 @@ public class PlayerMovement : MonoBehaviour
             else lateralCrashCooldown += Time.deltaTime;
         }
 
-
-        // Check left side wall crash
+        // Check right side wall crash
         if (rightCrash && !terminal)
         {
             if (lateralCrashCooldown > 5)
@@ -218,7 +269,8 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Check crash with non-terminal obstacles
-        if (crashedNonTerminal && !terminal) {
+        if (crashedNonTerminal && !terminal)
+        {
             if (nonFinishingCooldown > 5)
             {
                 crashedNonTerminal = false;
@@ -230,7 +282,8 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Turn Right
-        if (!hasTurned && Input.GetKey(KeyCode.D)) {
+        if (!hasTurned && Input.GetKey(KeyCode.D))
+        {
             rightTurnPerformed = true;
             transform.Rotate(new Vector3(0, 90, 0), Space.Self);
             hasTurned = true;
@@ -245,9 +298,11 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Turn Cooldown to avoid multiple key-press detection
-        if (hasTurned) {
+        if (hasTurned)
+        {
             turnCooldown += Time.deltaTime;
-            if (turnCooldown > 0.5f) {
+            if (turnCooldown > 0.5f)
+            {
                 turnCooldown = 0;
                 hasTurned = false;
                 animator.SetBool("rightTurning", false);
@@ -257,11 +312,18 @@ public class PlayerMovement : MonoBehaviour
         // Falling Down (Game losing state)
         if (transform.localPosition.y < (floorY - 2))
         {
+            StopRunningSoundAndPlayDeath();
             falling = true;
             animator.SetBool("isFalling", true);
             terminal = true;
             endRunSequence.StartEndSequence();
         }
         else falling = false;
+    }
+
+    private void StopRunningSoundAndPlayDeath()
+    {
+        playerSound.Stop();
+        playerSound.PlayOneShot(dieSound, 1.0f);
     }
 }
