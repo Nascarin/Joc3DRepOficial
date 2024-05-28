@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class EndRunSequence : MonoBehaviour
 {
@@ -9,10 +11,16 @@ public class EndRunSequence : MonoBehaviour
     public GameObject liveDis;
     public GameObject endScreen;
     public GameObject fadeOut;
+    public PlayerMovement script;
     // Start is called before the first frame update
     public void StartEndSequence()
     {
         StartCoroutine(EndSequence());
+    }
+
+    void Update()
+    {
+
     }
 
     IEnumerator EndSequence()
