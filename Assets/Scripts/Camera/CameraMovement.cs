@@ -14,6 +14,7 @@ public class CameraMovement : MonoBehaviour
     private float xMiddle;
     private int rotationStep = 0;
     private Vector3 directionVector;
+    private float terminalCounter = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -26,7 +27,7 @@ public class CameraMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        cameraMoveSpeed = script.cameraSpeed;
+        if (!script.falling) cameraMoveSpeed = script.cameraSpeed;
         transform.Rotate(new Vector3(-17, 0, 0), Space.Self);
         transform.Translate(new Vector3(0,0,1) * Time.deltaTime * cameraMoveSpeed, Space.Self);
         transform.Rotate(new Vector3(17, 0, 0), Space.Self);
@@ -74,6 +75,19 @@ public class CameraMovement : MonoBehaviour
                 transform.Rotate(new Vector3(17, 0, 0));
             }
             else ++rotationStep;
+        }
+
+        // Game Over Transition
+        if (script.terminal) {
+            if (script.falling) { 
+                cameraMoveSpeed = 0;
+            }
+            if (terminalCounter < 0.5f && !script.falling) {
+                transform.Rotate(new Vector3(-17, 0, 0));
+                transform.Translate(new Vector3(0, 0, -1f) * Time.deltaTime, Space.Self);
+                transform.Rotate(new Vector3(17, 0, 0));
+                terminalCounter += Time.deltaTime;
+            }
         }
     }
 }
