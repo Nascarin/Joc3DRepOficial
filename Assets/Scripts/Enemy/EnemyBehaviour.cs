@@ -18,7 +18,7 @@ public class EnemyBehaviour : MonoBehaviour
     private bool startLeftTerminalProcess;
     private bool chaseLeft;
     private bool chaseRight;
-    private float timeElapsed;
+    //private float timeElapsed;
     // Start is called before the first frame update
     void Start()
     {
@@ -28,19 +28,19 @@ public class EnemyBehaviour : MonoBehaviour
         startRightTerminalProcess = false;
         chaseLeft = false;
         chaseRight = false;
-        timeElapsed = 0;
+        //timeElapsed = 0;
     }
 
     // Update is called once per frame
     void Update()
     {
         // Game difficulty adjustment
-        timeElapsed += Time.deltaTime;
+        /*timeElapsed += Time.deltaTime;
         if (timeElapsed < 4) spawnTile.obstacleSpawnProbability = 0.0f;
         else if (timeElapsed > 4 && timeElapsed <= 15) spawnTile.obstacleSpawnProbability = 0.4f;
         else if (timeElapsed > 15 && timeElapsed <= 30) spawnTile.obstacleSpawnProbability = 0.6f;
         else if (timeElapsed > 30 && timeElapsed <= 60) spawnTile.obstacleSpawnProbability = 0.8f;
-        else spawnTile.obstacleSpawnProbability = 0.9f;
+        else spawnTile.obstacleSpawnProbability = 0.9f;*/
 
         if (script.rightTurnPerformed) PlayerRightTurned = true;
         if (script.leftTurnPerformed) PlayerRightTurned = false;
@@ -97,20 +97,20 @@ public class EnemyBehaviour : MonoBehaviour
         if (script.leftCrash) chaseLeft = true;
         if (script.rightCrash || script.crashedNonTerminal) chaseRight = true;
 
-        if (chaseLeft && !spawnTile.obstaclePassed) {
+        if (chaseLeft && !script.obstaclePassed) {
             transform.position = playerPosition;
             transform.localRotation = script.transform.rotation;
             transform.position = script.transform.position - new Vector3(0,0,2);
         }
 
-        if (chaseRight && !spawnTile.obstaclePassed)
+        if (chaseRight && !script.obstaclePassed)
         {
             transform.position = playerPosition;
             transform.localRotation = script.transform.rotation;
             transform.position = script.transform.position - new Vector3(2, 0, 0);
         }
 
-        if (spawnTile.obstaclePassed) { 
+        if (script.obstaclePassed) { 
             chaseLeft = false;
             chaseRight = false;
         }

@@ -21,6 +21,9 @@ public class SpawnTile : MonoBehaviour
     public bool obstaclePassed;
     public int tileId;
     public int ordTile;
+    private bool jumpTile;
+    private int jTileCounter;
+    private float timePast;
 
     // Start is called before the first frame update
     void Start()
@@ -31,6 +34,8 @@ public class SpawnTile : MonoBehaviour
         startTime = Time.time;
         obstaclePassed = false;
         ordTile = 0;
+        jTileCounter = 0;
+        timePast = 0;
     }
 
     // Método para actualizar la dirección del tile
@@ -44,6 +49,17 @@ public class SpawnTile : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        //  Actualitzar dificultat en funció del temps transcorregut.
+        timePast += Time.deltaTime;
+        if (timePast <= 5f) obstacleSpawnProbability = 0.0f;
+        else if (timePast <= 25f) obstacleSpawnProbability = 0.2f;
+        else if (timePast <= 45f) obstacleSpawnProbability = 0.4f;
+        else if (timePast <= 90f) obstacleSpawnProbability = 0.6f;
+        else if (timePast <= 120f) obstacleSpawnProbability = 0.7f;
+        else if (timePast <= 150f) obstacleSpawnProbability = 0.8f;
+        else obstacleSpawnProbability = 0.85f;
+
         // Generar un nuevo tile si ha pasado el tiempo de espera
         if (Time.time - startTime > timeOffset)
         {
@@ -55,7 +71,16 @@ public class SpawnTile : MonoBehaviour
             {
                 // Instancia un tile con obstáculos usando un switch
                 int randomIndex = Random.Range(0, obstacleTiles.Length);
-                obstaclePassed = true;
+                if (jumpTile && jTileCounter < 2)
+                {
+                    randomIndex = randomIndex % 4; //Avoid two contiguous jumping obstacles.
+                    ++jTileCounter;
+                }
+                else {
+                    jTileCounter = 0;
+                    jumpTile = false;
+                }
+                //obstaclePassed = true;
                 tileId = 2;
                 switch (randomIndex)
                 {
@@ -81,16 +106,19 @@ public class SpawnTile : MonoBehaviour
 
                         break;
                     case 4:
+                        jumpTile = true;
                         spawnedTile = Instantiate(obstacleTiles[4], previousTilePosition, Quaternion.identity);
                         spawnedTile.transform.Rotate(0, tileAngle, 0);
 
                         break;
                     case 5:
+                        jumpTile = true;
                         spawnedTile = Instantiate(obstacleTiles[5], previousTilePosition, Quaternion.identity);
                         spawnedTile.transform.Rotate(0, tileAngle, 0);
 
                         break;
                     case 6:
+                        jumpTile = true;
                         spawnedTile = Instantiate(obstacleTiles[6], previousTilePosition, Quaternion.identity);
                         spawnedTile.transform.Rotate(0, tileAngle, 0);
 
@@ -121,7 +149,7 @@ public class SpawnTile : MonoBehaviour
                 }
                 else
                 {
-                    obstaclePassed = true;
+                    //obstaclePassed = true;
                     // Instancia un tile de giro
                     GameObject tileTSpawn = turnNext ? (mainDirection == Vector3.right ? tileRight : tileLeft) : tile;
                     GameObject spawnedTil = Instantiate(tileTSpawn, previousTilePosition, Quaternion.identity);

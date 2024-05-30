@@ -29,20 +29,25 @@ public class PlateSpawn : MonoBehaviour
             {
                 if (spawnTile.tileId == 0 || spawnTile.tileId == 1) // Normal Tile or Lateral Holes
                 {
+                    int probSide = Random.Range(0,2);
+                    float side = 0;
+                    if (probSide == 0) side = 0;
+                    else if (probSide == 1) side = 5;
+                    else if (probSide == 2) side = -5;
                     GameObject pCoin1 = Instantiate(plate, spawnTile.previousTilePosition, Quaternion.identity);
-                    pCoin1.transform.Translate(new Vector3(0, 3, 0), Space.Self);
+                    pCoin1.transform.Translate(new Vector3(side, 3, 0), Space.Self);
 
                     GameObject pCoin2 = Instantiate(plate, spawnTile.previousTilePosition, Quaternion.identity);
-                    pCoin2.transform.Translate(new Vector3(0, 3, -4), Space.Self);
+                    pCoin2.transform.Translate(new Vector3(side, 3, -4), Space.Self);
 
                     GameObject pCoin3 = Instantiate(plate, spawnTile.previousTilePosition, Quaternion.identity);
-                    pCoin3.transform.Translate(new Vector3(0, 3, 4), Space.Self);
+                    pCoin3.transform.Translate(new Vector3(side, 3, 4), Space.Self);
 
                     GameObject pCoin4 = Instantiate(plate, spawnTile.previousTilePosition, Quaternion.identity);
-                    pCoin4.transform.Translate(new Vector3(0, 3, -8), Space.Self);
+                    pCoin4.transform.Translate(new Vector3(side, 3, -8), Space.Self);
 
                     GameObject pCoin5 = Instantiate(plate, spawnTile.previousTilePosition, Quaternion.identity);
-                    pCoin5.transform.Translate(new Vector3(0, 3, 8), Space.Self);
+                    pCoin5.transform.Translate(new Vector3(side, 3, 8), Space.Self);
                 }
                 else if (spawnTile.tileId == 4) { // Panzer On Right
                     GameObject pCoin1 = Instantiate(plate, spawnTile.previousTilePosition, Quaternion.identity);
