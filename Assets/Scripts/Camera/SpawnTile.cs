@@ -7,17 +7,17 @@ public class SpawnTile : MonoBehaviour
     public GameObject tile; // Tile normal
     public GameObject tileRight; // Tile de giro a la derecha
     public GameObject tileLeft; // Tile de giro a la izquierda
-    public GameObject[] obstacleTiles; // Array de tiles con obstáculos
-    public GameObject referenceObject; // Objeto de referencia para la posición de los tiles
-    public float timeOffset = 0.4f; // Tiempo de espera entre la generación de tiles
+    public GameObject[] obstacleTiles; // Array de tiles con obstï¿½culos
+    public GameObject referenceObject; // Objeto de referencia para la posiciï¿½n de los tiles
+    public float timeOffset = 0.4f; // Tiempo de espera entre la generaciï¿½n de tiles
     public float distanceBetweenTiles = 5.0f; // Distancia entre tiles
-    public float randomValue = 0.8f; // Valor aleatorio para determinar si se generará un tile de giro
-    public float obstacleSpawnProbability = 0.2f; // Probabilidad de que un tile tenga obstáculos
-    public Vector3 previousTilePosition; // Posición del tile anterior
+    public float randomValue = 0.8f; // Valor aleatorio para determinar si se generarï¿½ un tile de giro
+    public float obstacleSpawnProbability = 0.2f; // Probabilidad de que un tile tenga obstï¿½culos
+    public Vector3 previousTilePosition; // Posiciï¿½n del tile anterior
     private float startTime; // Tiempo de inicio
     private Vector3 mainDirection = new Vector3(0, 0, 1), otherDirection = new Vector3(1, 0, 0); // Direcciones de los tiles
-    public float tileAngle = 0.0f; // Ángulo de rotación del tile
-    private bool turnNext = false; // Determina si el siguiente tile será un giro
+    public float tileAngle = 0.0f; // ï¿½ngulo de rotaciï¿½n del tile
+    private bool turnNext = false; // Determina si el siguiente tile serï¿½ un giro
     public bool obstaclePassed;
     public int tileId;
     public int ordTile;
@@ -28,7 +28,7 @@ public class SpawnTile : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // Inicializar la posición del tile anterior y el tiempo de inicio
+        // Inicializar la posiciï¿½n del tile anterior y el tiempo de inicio
         //previousTilePosition = referenceObject.transform.position;
         previousTilePosition = new Vector3(189.71f, 5.46f, 0.3f);
         startTime = Time.time;
@@ -38,7 +38,7 @@ public class SpawnTile : MonoBehaviour
         timePast = 0;
     }
 
-    // Método para actualizar la dirección del tile
+    // Mï¿½todo para actualizar la direcciï¿½n del tile
     public void UpdateDirection(Vector3 newMainDirection, Vector3 newOtherDirection)
     {
         // Actualizar las direcciones
@@ -50,7 +50,7 @@ public class SpawnTile : MonoBehaviour
     void Update()
     {
 
-        //  Actualitzar dificultat en funció del temps transcorregut.
+        //  Actualitzar dificultat en funciï¿½ del temps transcorregut.
         timePast += Time.deltaTime;
         if (timePast <= 5f) obstacleSpawnProbability = 0.0f;
         else if (timePast <= 25f) obstacleSpawnProbability = 0.2f;
@@ -66,10 +66,10 @@ public class SpawnTile : MonoBehaviour
 
             GameObject spawnedTile;
 
-            // Determina si se generará un tile normal o uno con obstáculos segun si hay un giro o no y la probabilidad
+            // Determina si se generarï¿½ un tile normal o uno con obstï¿½culos segun si hay un giro o no y la probabilidad
             if (!turnNext && Random.value < obstacleSpawnProbability)
             {
-                // Instancia un tile con obstáculos usando un switch
+                // Instancia un tile con obstï¿½culos usando un switch
                 int randomIndex = Random.Range(0, obstacleTiles.Length);
                 if (jumpTile && jTileCounter < 2)
                 {
@@ -84,7 +84,7 @@ public class SpawnTile : MonoBehaviour
                 tileId = 2;
                 switch (randomIndex)
                 {
-                    // Para cada caso, instanciar un tile con obstáculos y rotarlo
+                    // Para cada caso, instanciar un tile con obstï¿½culos y rotarlo
                     case 0:
                         spawnedTile = Instantiate(obstacleTiles[0], previousTilePosition, Quaternion.identity);
                         spawnedTile.transform.Rotate(0, tileAngle, 0);
@@ -129,7 +129,7 @@ public class SpawnTile : MonoBehaviour
 
                         break;
                     default:
-                        // En caso de que el índice esté fuera del rango del array
+                        // En caso de que el ï¿½ndice estï¿½ fuera del rango del array
                         spawnedTile = Instantiate(tile, previousTilePosition, Quaternion.identity);
                         spawnedTile.transform.Rotate(0, tileAngle, 0);
 
@@ -157,13 +157,13 @@ public class SpawnTile : MonoBehaviour
                     tileId = 1;
                 }
             }
-            // Calcular la siguiente posición del tile
+            // Calcular la siguiente posiciï¿½n del tile
             Vector3 nextPosition = previousTilePosition + distanceBetweenTiles * mainDirection;
-            // Determinar si el siguiente tile será un giro
+            // Determinar si el siguiente tile serï¿½ un giro
             turnNext = Random.value > randomValue;
             // Determinar el tile a instanciar
             GameObject tileToSpawn = turnNext ? (mainDirection == Vector3.right ? tileRight : tileLeft) : tile;
-            // Rotar el tile según la dirección
+            // Rotar el tile segï¿½n la direcciï¿½n
             if (turnNext && tileToSpawn == tileRight)
             {
                 tileAngle += +90.0f;
@@ -172,7 +172,7 @@ public class SpawnTile : MonoBehaviour
             {
                 tileAngle += -90.0f;
             }
-            // Rotar el tile según la dirección
+            // Rotar el tile segï¿½n la direcciï¿½n
             if (turnNext)
             {
                 Vector3 temp = mainDirection;
@@ -180,7 +180,7 @@ public class SpawnTile : MonoBehaviour
                 otherDirection = temp;
             }
 
-            // Actualizar la posición del tile anterior
+            // Actualizar la posiciï¿½n del tile anterior
             previousTilePosition = nextPosition;
             // Actualizar el tiempo de inicio
             startTime = Time.time;

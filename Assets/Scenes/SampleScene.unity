@@ -8641,6 +8641,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1278205228}
     - target: {fileID: 2309072065789024823, guid: 221c460b336af6240a0c58ac18e175ad, type: 3}
+      propertyPath: hitWall
+      value: 
+      objectReference: {fileID: 8300000, guid: 0baca30583e139c44aedfc1c188bda61, type: 3}
+    - target: {fileID: 2309072065789024823, guid: 221c460b336af6240a0c58ac18e175ad, type: 3}
+      propertyPath: dieSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 0cf7846f4f99fe24d87f62cb16b66ce5, type: 3}
+    - target: {fileID: 2309072065789024823, guid: 221c460b336af6240a0c58ac18e175ad, type: 3}
       propertyPath: jumpDiff
       value: 0.2
       objectReference: {fileID: 0}
@@ -8656,6 +8664,10 @@ PrefabInstance:
       propertyPath: rightCrash
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2309072065789024823, guid: 221c460b336af6240a0c58ac18e175ad, type: 3}
+      propertyPath: slideSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 92a95b07913082544b3f81c3ba82d069, type: 3}
     - target: {fileID: 2309072065789024823, guid: 221c460b336af6240a0c58ac18e175ad, type: 3}
       propertyPath: trigHitbox
       value: 
@@ -8854,6 +8866,9 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 258031161}
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5852333505400217085, guid: 221c460b336af6240a0c58ac18e175ad, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2124469894}
     - targetCorrespondingSourceObject: {fileID: 1043635605335181096, guid: 221c460b336af6240a0c58ac18e175ad, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1386157915}
@@ -9026,6 +9041,10 @@ PrefabInstance:
     - target: {fileID: 8634869775150279322, guid: fa4f80b9114bf974f8d9490848901736, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6997773060333517523, guid: 7281a1371826deb468e711d91551b0e5, type: 3}
+      propertyPath: m_Name
+      value: HoleJump
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -9353,31 +9372,31 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7521913913814675781, guid: 583767898537ba044978253bd783d038, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.7072731
+      value: 0.7070972
       objectReference: {fileID: 0}
     - target: {fileID: 7521913913814675781, guid: 583767898537ba044978253bd783d038, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.0015881655
+      value: 0.0013859583
       objectReference: {fileID: 0}
     - target: {fileID: 7521913913814675781, guid: 583767898537ba044978253bd783d038, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.7069372
+      value: 0.70711374
       objectReference: {fileID: 0}
     - target: {fileID: 7521913913814675781, guid: 583767898537ba044978253bd783d038, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.001438952
+      value: 0.001376008
       objectReference: {fileID: 0}
     - target: {fileID: 7521913913814675781, guid: 583767898537ba044978253bd783d038, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 0.012
+      value: 0.001
       objectReference: {fileID: 0}
     - target: {fileID: 7521913913814675781, guid: 583767898537ba044978253bd783d038, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 89.973
+      value: 90.001
       objectReference: {fileID: 0}
     - target: {fileID: 7521913913814675781, guid: 583767898537ba044978253bd783d038, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0.245
+      value: 0.224
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

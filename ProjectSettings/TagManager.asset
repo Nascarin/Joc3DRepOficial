@@ -11,12 +11,6 @@ TagManager:
   - RightWall
   - NonFOBS
   - Coin
-  - GMCrawl
-  - GMJump
-  - GMRight
-  - GMLeft
-  - GMLeftS
-  - GMRightS
   layers:
   - Default
   - TransparentFX

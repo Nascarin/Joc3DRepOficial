@@ -64,7 +64,6 @@ public class PlayerMovement : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         hitbox = GetComponent<BoxCollider>();
-        //trigHitbox = GetComponent<BoxCollider>();
         rb = GetComponent<Rigidbody>();
         floorY = transform.localPosition.y;
         initialRunSpeed = RunSpeed;
@@ -84,10 +83,12 @@ public class PlayerMovement : MonoBehaviour
     // Collision detection
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.tag == "FRObstacle") {
+        if (collision.gameObject.tag == "FRObstacle")
+        {
             animator.SetBool("FrontalCrash", true);
             RunSpeed = 0;
             cameraSpeed = 0;
+            StopRunningSoundAndPlayDeath();
             terminal = true;
             footSteps.gameObject.SetActive(false);
             endRunSequence.StartEndSequence();
@@ -251,7 +252,7 @@ public class PlayerMovement : MonoBehaviour
         coinCounter.text = "" + ((coinsCollected / 2) + (coinsCollected % 2));
         generalPointsCounter.text = "" + pointsCollected;
         // Idle forward running
-        transform.Translate(new Vector3(0.0f,0.0f,1.0f) * Time.deltaTime * RunSpeed, Space.Self);
+        transform.Translate(new Vector3(0.0f, 0.0f, 1.0f) * Time.deltaTime * RunSpeed, Space.Self);
 
         // Moving to the left
         if (Input.GetKey(KeyCode.LeftArrow) && !godMode) {
@@ -261,7 +262,7 @@ public class PlayerMovement : MonoBehaviour
         // Moving to the right
         if (Input.GetKey(KeyCode.RightArrow) && !godMode)
         {
-                transform.Translate(new Vector3(1.0f, 0.0f, 0.0f) * Time.deltaTime * HorizontalSpeed, Space.Self);
+            transform.Translate(new Vector3(1.0f, 0.0f, 0.0f) * Time.deltaTime * HorizontalSpeed, Space.Self);
         }
 
         // Jumping
@@ -281,11 +282,11 @@ public class PlayerMovement : MonoBehaviour
             if (/*(transform.localPosition.y - floorY) < jumpDiff && */jumpCooldown > 1.5f)
             {
                 canJump = true;
-                //hitbox.center = new Vector3(0, 0.82f, 0);
                 jumpCooldown = 0;
             }
             else jumpCooldown += Time.deltaTime;
-            if (jumpCooldown > 1) {
+            if (jumpCooldown > 1)
+            {
                 hitbox.center = new Vector3(0, 0.82f, 0);
             }
         }
@@ -293,6 +294,7 @@ public class PlayerMovement : MonoBehaviour
         // Crawling
         if (canCrawl && Input.GetKey(KeyCode.DownArrow) && !godMode) {
             animator.SetBool("isCrawling", true);
+            playerSound.PlayOneShot(slideSound, 1.0f);
             canCrawl = false;
             startCrawlTimer = true;
             hitbox.center = new Vector3(0, 0.68f, 0);
@@ -302,7 +304,8 @@ public class PlayerMovement : MonoBehaviour
         {
             crawlTimer += Time.deltaTime;
         }
-        else if (crawlTimer > 1.2){
+        else if (crawlTimer > 1.2)
+        {
             startCrawlTimer = false;
             crawlTimer = 0;
             canCrawl = true;
@@ -365,9 +368,11 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Turn Cooldown to avoid multiple key-press detection
-        if (hasTurned) {
+        if (hasTurned)
+        {
             turnCooldown += Time.deltaTime;
-            if (turnCooldown > 0.5f) {
+            if (turnCooldown > 0.5f)
+            {
                 turnCooldown = 0;
                 hasTurned = false;
                 animator.SetBool("rightTurning", false);
@@ -377,6 +382,7 @@ public class PlayerMovement : MonoBehaviour
         // Falling Down (Game losing state)
         if (transform.localPosition.y < (floorY - 2))
         {
+            StopRunningSoundAndPlayDeath();
             falling = true;
             animator.SetBool("isFalling", true);
             terminal = true;
@@ -404,5 +410,11 @@ public class PlayerMovement : MonoBehaviour
             godModeCooldown += Time.deltaTime;
             if (godModeCooldown > 0.2f) godModeCooldown = 0;
         }
+    }
+
+    private void StopRunningSoundAndPlayDeath()
+    {
+        playerSound.Stop();
+        playerSound.PlayOneShot(dieSound, 1.0f);
     }
 }
