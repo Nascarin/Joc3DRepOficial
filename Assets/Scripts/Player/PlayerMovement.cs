@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using TMPro;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -44,8 +45,21 @@ public class PlayerMovement : MonoBehaviour
     public Vector3 playerPos;
     public Vector3 initialPos;
     public EndRunSequence endRunSequence;
+    public int coinsCollected;
+    public int pointsCollected;
+    private float pointsTime;
+    public TextMeshProUGUI coinCounter;
+    public TextMeshProUGUI generalPointsCounter;
+    public TextMeshProUGUI endCoinCounter;
+    public TextMeshProUGUI endGeneralPointsCounter;
+    public bool godMode;
+    private float godModeCooldown;
+    public bool obstaclePassed;
+    public ParticleSystem footSteps;
+    public ParticleSystem coinSparks;
+    public ParticleSystem GMAura;
 
-    private AudioSource playerSound;
+    public AudioSource playerSound;
 
     public AudioClip startRun1;
     public AudioClip startRun2;
@@ -54,10 +68,10 @@ public class PlayerMovement : MonoBehaviour
     public AudioClip dieSound;
     public AudioClip hitWall;
     public AudioClip runSound;
-    public AudioClip coinSound;  
+    public AudioClip coinSound;
     public AudioClip hitObstacle;
-    public AudioClip slideSound; 
-
+    public AudioClip slideSound;
+    //public ParticleSystem DamageParticles;
     // Start is called before the first frame update
     void Start()
     {
@@ -71,7 +85,12 @@ public class PlayerMovement : MonoBehaviour
         CrashSpeed = RunSpeed * 0.5f;
         idleRunSpeed = RunSpeed;
         crashedNonTerminal = false;
-        playerSound = GetComponent<AudioSource>();
+        coinsCollected = 0;
+        pointsCollected = 0;
+        pointsTime = 0;
+        godMode = false;
+        godModeCooldown = 0;
+        obstaclePassed = false;
         StartCoroutine(PlayStartingSounds());
     }
 
@@ -99,25 +118,26 @@ public class PlayerMovement : MonoBehaviour
             cameraSpeed = 0;
             StopRunningSoundAndPlayDeath();
             terminal = true;
+            footSteps.gameObject.SetActive(false);
             endRunSequence.StartEndSequence();
         }
-        if (collision.gameObject.tag == "LeftWall")
-        {
+        if (collision.gameObject.tag == "LeftWall") {
             playerSound.PlayOneShot(hitWall, 1.0f);
-            if (lateralCrashCooldown == 0 || lateralCrashCooldown > 1)
-            {
+            if (lateralCrashCooldown == 0 || lateralCrashCooldown > 1) {
                 if (leftCrash || rightCrash)
                 {
                     RunSpeed = 0;
                     cameraSpeed = 0;
-                    terminal = true;
                     StopRunningSoundAndPlayDeath();
+                    terminal = true;
+                    footSteps.gameObject.SetActive(false);
                 }
                 else
                 {
                     leftCrash = true;
                     enemyFollow = true;
                     Debug.Log("LEFT-WALL-TOUCHED!!");
+                    //DamageParticles.Play();
                     if (lateralCrashCooldown == 0) RunSpeed = CrashSpeed;
                 }
             }
@@ -125,50 +145,122 @@ public class PlayerMovement : MonoBehaviour
         if (collision.gameObject.tag == "RightWall")
         {
             playerSound.PlayOneShot(hitWall, 1.0f);
-            if (lateralCrashCooldown == 0 || lateralCrashCooldown > 1)
-            {
+            if (lateralCrashCooldown == 0 || lateralCrashCooldown > 1) {
                 if (rightCrash || leftCrash)
                 {
                     RunSpeed = 0;
                     cameraSpeed = 0;
-                    terminal = true;
                     StopRunningSoundAndPlayDeath();
+                    terminal = true;
+                    footSteps.gameObject.SetActive(false);
                 }
                 else
                 {
                     rightCrash = true;
                     enemyFollow = true;
                     Debug.Log("RIGHT-WALL-TOUCHED!!");
+                    //DamageParticles.Play();
                     if (lateralCrashCooldown == 0) RunSpeed = CrashSpeed;
                 }
             }
         }
-        if (collision.gameObject.tag == "NonFOBS")
-        {
+        if (collision.gameObject.tag == "NonFOBS") {
             if (crashedNonTerminal)
             {
                 RunSpeed = 0;
                 cameraSpeed = 0;
-                terminal = true;
                 StopRunningSoundAndPlayDeath();
+                terminal = true;
+                footSteps.gameObject.SetActive(false);
                 animator.SetBool("Injured", false);
             }
-            else
-            {
-                playerSound.PlayOneShot(hitObstacle, 1.0f); // Reproducir sonido de deslizamiento
+            else {
                 Quaternion rot = transform.rotation; // Safety measures: Avoiding unexpected behaviour from the physics engine
                 transform.Translate(new Vector3(0, 0, 1.4f), Space.Self);
                 transform.rotation = rot;
                 crashedNonTerminal = true;
                 if (nonFinishingCooldown == 0) RunSpeed = CrashSpeed;
                 animator.SetBool("Injured", true);
+                playerSound.PlayOneShot(hitObstacle, 1.0f); // Reproducir sonido de deslizamiento
+                //DamageParticles.Play();
             }
         }
-        if (collision.gameObject.tag == "Coin")
-        {
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Coin") {
+            ++coinsCollected;
             playerSound.PlayOneShot(coinSound, 1.0f); // Reproducir sonido de moneda
-            Debug.Log("COIN TOUCHED");
+            Destroy(other.gameObject);
+            coinSparks.Play();
         }
+
+        if (other.gameObject.tag == "GMCrawl") {
+            obstaclePassed = true;
+            if (godMode) {
+                // Crawling
+                animator.SetBool("isCrawling", true);
+                canCrawl = false;
+                startCrawlTimer = true;
+                hitbox.center = new Vector3(0, 0.68f, 0);
+                hitbox.size = new Vector3(1, 0.95f, 1);
+            }
+        }
+
+        if (other.gameObject.tag == "GMJump") {
+            obstaclePassed = true;
+            // God Mode Jumping
+            if (godMode) {
+                Debug.Log("JUMPING-SETTING-ANIM");
+                animator.SetBool("isJumping", true);
+                footSteps.gameObject.SetActive(false);
+                canJump = false;
+                rb.AddForce(Vector3.up * (jumpIntensity/1.8f), ForceMode.Impulse);
+                hitbox.center = new Vector3(0, 1.88f, 0);
+            }
+        }
+
+        if (other.gameObject.tag == "GMRight") {
+            obstaclePassed = true;
+            if (godMode) {
+                rightTurnPerformed = true;
+                transform.Rotate(new Vector3(0, 45, 0), Space.Self);
+                hasTurned = true;
+            }
+        }
+
+        if (other.gameObject.tag == "GMLeft")
+        {
+            obstaclePassed = true;
+            if (godMode)
+            {
+                leftTurnPerformed = true;
+                transform.Rotate(new Vector3(0, -45, 0), Space.Self);
+                hasTurned = true;
+            }
+        }
+
+        if (other.gameObject.tag == "GMLeftS") {
+            if (godMode) {
+                transform.Translate(new Vector3(-12.0f, 0.0f, 0.0f) * Time.deltaTime * HorizontalSpeed, Space.Self);
+            }
+        }
+
+        if (other.gameObject.tag == "GMRightS") {
+            if (godMode)
+            {
+                transform.Translate(new Vector3(12.0f, 0.0f, 0.0f) * Time.deltaTime * HorizontalSpeed, Space.Self);
+            }
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.tag == "GMCrawl") obstaclePassed = false;
+        if (other.gameObject.tag == "GMJump") obstaclePassed = false;
+        if (other.gameObject.tag == "GMLeft") obstaclePassed = false;
+        if (other.gameObject.tag == "GMRight") obstaclePassed = false;
     }
 
     // Update is called once per frame
@@ -178,35 +270,54 @@ public class PlayerMovement : MonoBehaviour
         trigHitbox.center = hitbox.center;
         trigHitbox.size = hitbox.size;
         playerPos = transform.position;
+
+        // Time points counting at every quarter of a second
+        pointsTime += Time.deltaTime;
+        if ((pointsTime > 0.5f) && !terminal) {
+            ++pointsCollected;
+            pointsCollected += (int)(coinsCollected * 1.05);
+            pointsTime = 0;
+        }
+
+        if (terminal) {
+            endCoinCounter.text = "" + ((coinsCollected / 2) + (coinsCollected % 2));
+            endGeneralPointsCounter.text = "" + pointsCollected;
+        }
+
+        coinCounter.text = "" + ((coinsCollected / 2) + (coinsCollected % 2));
+        generalPointsCounter.text = "" + pointsCollected;
         // Idle forward running
         transform.Translate(new Vector3(0.0f, 0.0f, 1.0f) * Time.deltaTime * RunSpeed, Space.Self);
 
         // Moving to the left
-        if (Input.GetKey(KeyCode.LeftArrow))
-        {
-            transform.Translate(new Vector3(-1.0f, 0.0f, 0.0f) * Time.deltaTime * HorizontalSpeed, Space.Self);
+        if (Input.GetKey(KeyCode.LeftArrow) && !godMode) {
+                transform.Translate(new Vector3(-1.0f, 0.0f, 0.0f) * Time.deltaTime * HorizontalSpeed, Space.Self);
         }
 
         // Moving to the right
-        if (Input.GetKey(KeyCode.RightArrow))
+        if (Input.GetKey(KeyCode.RightArrow) && !godMode)
         {
             transform.Translate(new Vector3(1.0f, 0.0f, 0.0f) * Time.deltaTime * HorizontalSpeed, Space.Self);
         }
 
         // Jumping
-        if (canJump && Input.GetKey(KeyCode.UpArrow))
-        {
+        if (canJump && Input.GetKey(KeyCode.UpArrow) && !godMode) {
             Debug.Log("JUMPING-SETTING-ANIM");
             animator.SetBool("isJumping", true);
+            playerSound.Pause();
             playerSound.PlayOneShot(jumpSound, 1.0f);
+            playerSound.UnPause();
+            footSteps.gameObject.SetActive(false);
             canJump = false;
             rb.AddForce(Vector3.up * jumpIntensity, ForceMode.Impulse);
             hitbox.center = new Vector3(0, 1.88f, 0);
         }
-        if (!canJump)
-        {
-            if (jumpCooldown > 1 && (transform.localPosition.y - floorY) < jumpDiff) animator.SetBool("isJumping", false);
-            if (jumpCooldown > 1.5f)
+        if (!canJump) {
+            if (jumpCooldown > 1 && (transform.localPosition.y - floorY) < jumpDiff) {
+                animator.SetBool("isJumping", false);
+                footSteps.gameObject.SetActive(true);
+            }
+            if (/*(transform.localPosition.y - floorY) < jumpDiff && */jumpCooldown > 1.5f)
             {
                 canJump = true;
                 jumpCooldown = 0;
@@ -219,8 +330,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Crawling
-        if (canCrawl && Input.GetKey(KeyCode.DownArrow))
-        {
+        if (canCrawl && Input.GetKey(KeyCode.DownArrow) && !godMode) {
             animator.SetBool("isCrawling", true);
             playerSound.PlayOneShot(slideSound, 1.0f);
             canCrawl = false;
@@ -243,8 +353,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Check left side wall crash
-        if (leftCrash && !terminal)
-        {
+        if (leftCrash && !terminal) {
             if (lateralCrashCooldown > 5)
             {
                 leftCrash = false;
@@ -255,7 +364,8 @@ public class PlayerMovement : MonoBehaviour
             else lateralCrashCooldown += Time.deltaTime;
         }
 
-        // Check right side wall crash
+
+        // Check left side wall crash
         if (rightCrash && !terminal)
         {
             if (lateralCrashCooldown > 5)
@@ -269,8 +379,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Check crash with non-terminal obstacles
-        if (crashedNonTerminal && !terminal)
-        {
+        if (crashedNonTerminal && !terminal) {
             if (nonFinishingCooldown > 5)
             {
                 crashedNonTerminal = false;
@@ -282,15 +391,14 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Turn Right
-        if (!hasTurned && Input.GetKey(KeyCode.D))
-        {
+        if (!hasTurned && Input.GetKey(KeyCode.D) && !godMode) {
             rightTurnPerformed = true;
             transform.Rotate(new Vector3(0, 90, 0), Space.Self);
             hasTurned = true;
         }
 
         // Turn Left
-        if (!hasTurned && Input.GetKey(KeyCode.A))
+        if (!hasTurned && Input.GetKey(KeyCode.A) && !godMode)
         {
             leftTurnPerformed = true;
             transform.Rotate(new Vector3(0, -90, 0), Space.Self);
@@ -319,6 +427,27 @@ public class PlayerMovement : MonoBehaviour
             endRunSequence.StartEndSequence();
         }
         else falling = false;
+
+        // God Mode
+        if (Input.GetKey(KeyCode.G)) {
+            if (godModeCooldown == 0)
+            {
+                if (!godMode) {
+                    godMode = true;
+                    GMAura.Play();
+                } 
+                else {
+                    godMode = false;
+                    GMAura.Stop();
+                }
+                godModeCooldown += Time.deltaTime;
+            }
+        }
+        if (godModeCooldown > 0) // Control de flancos al presionar tecla G
+        {
+            godModeCooldown += Time.deltaTime;
+            if (godModeCooldown > 0.2f) godModeCooldown = 0;
+        }
     }
 
     private void StopRunningSoundAndPlayDeath()
