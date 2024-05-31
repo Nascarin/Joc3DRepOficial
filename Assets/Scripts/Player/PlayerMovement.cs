@@ -65,6 +65,7 @@ public class PlayerMovement : MonoBehaviour
     public AudioClip startRun2;
     public AudioClip startRun3;
     public AudioClip jumpSound;
+    public AudioClip landJump;
     public AudioClip dieSound;
     public AudioClip hitWall;
     public AudioClip runSound;
@@ -315,10 +316,14 @@ public class PlayerMovement : MonoBehaviour
         if (!canJump) {
             if (jumpCooldown > 1 && (transform.localPosition.y - floorY) < jumpDiff) {
                 animator.SetBool("isJumping", false);
+                
                 footSteps.gameObject.SetActive(true);
             }
             if (/*(transform.localPosition.y - floorY) < jumpDiff && */jumpCooldown > 1.5f)
             {
+                playerSound.Pause();
+                playerSound.PlayOneShot(landJump, 1.0f);
+                playerSound.UnPause();
                 canJump = true;
                 jumpCooldown = 0;
             }
