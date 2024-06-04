@@ -31,6 +31,7 @@ public class PlayerMovement : MonoBehaviour
     bool hasTurned = false;
     public bool leftTurnPerformed = false;
     public bool rightTurnPerformed = false;
+    public float cornerCooldown;
     public bool falling = false;
     public bool terminal = false;
     float crawlTimer = 0;
@@ -92,6 +93,7 @@ public class PlayerMovement : MonoBehaviour
         godMode = false;
         godModeCooldown = 0;
         obstaclePassed = false;
+        cornerCooldown = 0;
         StartCoroutine(PlayStartingSounds());
     }
 
@@ -132,6 +134,7 @@ public class PlayerMovement : MonoBehaviour
                     StopRunningSoundAndPlayDeath();
                     terminal = true;
                     footSteps.gameObject.SetActive(false);
+                    animator.SetBool("FrontalCrash", true);
                 }
                 else
                 {
@@ -154,6 +157,7 @@ public class PlayerMovement : MonoBehaviour
                     StopRunningSoundAndPlayDeath();
                     terminal = true;
                     footSteps.gameObject.SetActive(false);
+                    animator.SetBool("FrontalCrash", true);
                 }
                 else
                 {
@@ -285,6 +289,12 @@ public class PlayerMovement : MonoBehaviour
             endGeneralPointsCounter.text = "" + pointsCollected;
         }
 
+        if (cornerCooldown > 0)
+        {
+            cornerCooldown -= Time.deltaTime;
+        }
+        else cornerCooldown = 0;
+
         coinCounter.text = "" + ((coinsCollected / 2) + (coinsCollected % 2));
         generalPointsCounter.text = "" + pointsCollected;
         // Idle forward running
@@ -396,16 +406,18 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Turn Right
-        if (!hasTurned && Input.GetKey(KeyCode.D) && !godMode) {
+        if (!hasTurned && Input.GetKey(KeyCode.D) && !godMode && (cornerCooldown == 0)) {
             rightTurnPerformed = true;
+            cornerCooldown = 0.7f;
             transform.Rotate(new Vector3(0, 90, 0), Space.Self);
             hasTurned = true;
         }
 
         // Turn Left
-        if (!hasTurned && Input.GetKey(KeyCode.A) && !godMode)
+        if (!hasTurned && Input.GetKey(KeyCode.A) && !godMode && (cornerCooldown == 0))
         {
             leftTurnPerformed = true;
+            cornerCooldown = 0.7f;
             transform.Rotate(new Vector3(0, -90, 0), Space.Self);
             hasTurned = true;
         }

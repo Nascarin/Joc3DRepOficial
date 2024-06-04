@@ -22,7 +22,9 @@ public class SpawnTile : MonoBehaviour
     public int tileId;
     public int ordTile;
     private bool jumpTile;
+    private bool tankTile;
     private int jTileCounter;
+    private int tankTileCounter;
     private float timePast;
 
     // Start is called before the first frame update
@@ -35,6 +37,7 @@ public class SpawnTile : MonoBehaviour
         obstaclePassed = false;
         ordTile = 0;
         jTileCounter = 0;
+        tankTileCounter = 0;
         timePast = 0;
     }
 
@@ -80,6 +83,17 @@ public class SpawnTile : MonoBehaviour
                     jTileCounter = 0;
                     jumpTile = false;
                 }
+
+                if (tankTile && tankTileCounter < 2)
+                {
+                    randomIndex = randomIndex % 2; //Avoid two contiguous jumping obstacles.
+                    ++tankTileCounter;
+                }
+                else
+                {
+                    tankTileCounter = 0;
+                    tankTile = false;
+                }
                 //obstaclePassed = true;
                 tileId = 2;
                 switch (randomIndex)
@@ -96,11 +110,13 @@ public class SpawnTile : MonoBehaviour
 
                         break;
                     case 2:
+                        tankTile = true;
                         spawnedTile = Instantiate(obstacleTiles[2], previousTilePosition, Quaternion.identity);
                         spawnedTile.transform.Rotate(0, tileAngle, 0);
 
                         break;
                     case 3:
+                        tankTile = true;
                         spawnedTile = Instantiate(obstacleTiles[3], previousTilePosition, Quaternion.identity);
                         spawnedTile.transform.Rotate(0, tileAngle, 0);
 

@@ -13,8 +13,11 @@ public class CameraMovement : MonoBehaviour
     private int anglePerformed = 0;
     private float xMiddle;
     private int rotationStep = 0;
+    public float rotationSpeed = 0;
+    public float terminalSpeed = 0;
     private Vector3 directionVector;
     private float terminalCounter = 0;
+    private float giroAct = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -34,7 +37,7 @@ public class CameraMovement : MonoBehaviour
         if (script.terminal) {
             if (terminalAnimCounter < 5) {
                 terminalAnimCounter += 1;
-                transform.Translate(new Vector3(0.0f, 0.0f, -1.0f), Space.Self);
+                transform.Translate(new Vector3(0.0f, 0.0f, -1.0f) * Time.deltaTime, Space.Self);
             }
         }
 
@@ -43,14 +46,16 @@ public class CameraMovement : MonoBehaviour
             Vector3 playerPos = script.playerPos;
             transform.position = playerPos;
             transform.Rotate(new Vector3(-17, 0, 0));
-            transform.Rotate(new Vector3(0, -1, 0), Space.Self);
+            transform.Rotate(new Vector3(0, -1, 0) * Time.deltaTime * rotationSpeed, Space.Self);
+            giroAct += Time.deltaTime * rotationSpeed;
             transform.Translate(new Vector3(0, 8.69f, -10.44f), Space.Self);
             transform.Rotate(new Vector3(17, 0, 0));
-            if (rotationStep > 88) {
+            if (giroAct >= 90f) {
                 script.leftTurnPerformed = false;
                 transform.position = playerPos;
-                rotationStep = 0;
+                giroAct = 0;
                 transform.Rotate(new Vector3(-17, 0, 0));
+                transform.rotation = script.transform.rotation;
                 transform.Translate(new Vector3(0, 8.69f, -10.44f), Space.Self);
                 transform.Rotate(new Vector3(17, 0, 0));
             }
@@ -62,15 +67,17 @@ public class CameraMovement : MonoBehaviour
             Vector3 playerPos = script.playerPos;
             transform.position = playerPos;
             transform.Rotate(new Vector3(-17, 0, 0));
-            transform.Rotate(new Vector3(0, 1, 0), Space.Self);
+            transform.Rotate(new Vector3(0, 1, 0) * Time.deltaTime * rotationSpeed, Space.Self);
+            giroAct += Time.deltaTime * rotationSpeed;
             transform.Translate(new Vector3(0, 8.69f, -10.44f), Space.Self);
             transform.Rotate(new Vector3(17, 0, 0));
-            if (rotationStep > 88)
+            if (giroAct >= 90f)
             {
                 script.rightTurnPerformed = false;
                 transform.position = playerPos;
-                rotationStep = 0;
+                giroAct = 0;
                 transform.Rotate(new Vector3(-17, 0, 0));
+                transform.rotation = script.transform.rotation;
                 transform.Translate(new Vector3(0, 8.69f, -10.44f), Space.Self);
                 transform.Rotate(new Vector3(17, 0, 0));
             }
@@ -84,7 +91,7 @@ public class CameraMovement : MonoBehaviour
             }
             if (terminalCounter < 0.5f && !script.falling) {
                 transform.Rotate(new Vector3(-17, 0, 0));
-                transform.Translate(new Vector3(0, 0, -1f) * Time.deltaTime, Space.Self);
+                transform.Translate(new Vector3(0, 0, -1f) * Time.deltaTime * terminalSpeed, Space.Self);
                 transform.Rotate(new Vector3(17, 0, 0));
                 terminalCounter += Time.deltaTime;
             }
